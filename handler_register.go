@@ -27,6 +27,6 @@ func handlerRegister(s *state, cmd command) error {
 	if err != nil {
 		return fmt.Errorf("error updating username in config file: %s", err)
 	}
-	fmt.Printf("New username %s registered!/\n", s.config.CurrentUserName)
+	fmt.Printf("New username %s registered!\n", s.config.CurrentUserName)
 	return nil
 }
