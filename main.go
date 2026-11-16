@@ -21,10 +21,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error reading config: %v", err)
 	}
+
 	db, err := sql.Open("postgres", cfg.DbURL)
 	if err != nil {
 		log.Fatalf("Error connecting to DB: %v", err)
 	}
+	defer db.Close()
+
 	appState := &state{
 		config: &cfg,
 		db:     database.New(db),
@@ -36,15 +39,15 @@ func main() {
 	cmds.register("register", handlerRegister)
 	cmds.register("reset", handlerReset)
 	cmds.register("users", handlerUsers)
-	osArgs := os.Args
-	if len(osArgs) < 2 {
+	cmds.register("agg", handlerAgg)
+
+	if len(os.Args) < 2 {
 		log.Fatal("Usage: cli <command> [args...]")
 	}
-	cmd := command{
-		Name: osArgs[1],
-		Args: osArgs[2:],
-	}
-	err = cmds.run(appState, cmd)
+	cmdName := os.Args[1]
+	cmdArgs := os.Args[2:]
+
+	err = cmds.run(appState, command{Name: cmdName, Args: cmdArgs})
 	if err != nil {
 		log.Fatal(err)
 	}
