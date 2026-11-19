@@ -7,3 +7,13 @@ RETURNING *;
 SELECT feeds.*, users.name
 FROM feeds
 LEFT JOIN users ON feeds.user_id = users.id;
+
+-- name: GetFeedByName :one
+SELECT *
+FROM feeds
+WHERE name=$1;
+
+-- name: GetFeedByUrl :one
+SELECT *
+FROM feeds
+WHERE url=$1;
