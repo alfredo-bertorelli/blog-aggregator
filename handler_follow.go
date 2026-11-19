@@ -11,7 +11,7 @@ import (
 
 func handlerFollow(s *state, cmd command, user database.User) error {
 	if len(cmd.Args) != 1 {
-		return fmt.Errorf("usage: %s <URL>", cmd.Name)
+		return fmt.Errorf("usage: %s <feed_url>", cmd.Name)
 	}
 	url := cmd.Args[0]
 
