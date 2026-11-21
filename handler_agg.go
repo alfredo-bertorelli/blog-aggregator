@@ -1,18 +1,25 @@
 package main
 
 import (
-	"context"
 	"fmt"
+	"time"
 )
 
 func handlerAgg(s *state, cmd command) error {
-	if len(cmd.Args) != 0 {
-		return fmt.Errorf("usage: %s", cmd.Name)
+	if len(cmd.Args) != 1 {
+		return fmt.Errorf("usage: %s <interval>", cmd.Name)
 	}
-	feed, err := fetchFeed(context.Background(), "https://www.wagslane.dev/index.xml")
+	interval, err := time.ParseDuration(cmd.Args[0])
 	if err != nil {
-		return fmt.Errorf("couldn't fetch feed: %w", err)
+		return fmt.Errorf("couldn't parse interval: %w", err)
 	}
-	fmt.Printf("Feed: %+v\n", *feed)
+	fmt.Printf("Collecting feeds every %s\n\n", interval)
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+
+	for ; ; <-ticker.C {
+		scrapeFeed(s)
+	}
+
 	return nil
 }

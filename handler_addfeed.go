@@ -37,7 +37,7 @@ func handlerAddFeed(s *state, cmd command, user database.User) error {
 	}
 	_, err = s.db.CreateFeedFollow(context.Background(), feedFollow)
 	if err != nil {
-		return fmt.Errorf("couldn't add feed_follow record: ", err)
+		return fmt.Errorf("couldn't add feed_follow record: %w", err)
 	}
 
 	return nil

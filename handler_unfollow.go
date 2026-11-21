@@ -26,5 +26,7 @@ func handlerUnfollow(s *state, cmd command, user database.User) error {
 	if err != nil {
 		return fmt.Errorf("couldn't delete feed follow: %w", err)
 	}
+
+	fmt.Printf("%s unfollowed!", feed.Name)
 	return nil
 }
