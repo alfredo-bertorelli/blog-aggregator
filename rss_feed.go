@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/alfredo-bertorelli/blog-aggregator/internal/database"
+	"github.com/google/uuid"
 )
 
 type RSSFeed struct {
@@ -91,10 +92,51 @@ func scrapeFeed(s *state) error {
 		return fmt.Errorf("couldn't fetch feed: %w", err)
 	}
 
+	newPosts := 0
 	fmt.Printf("-- Feed: %s\n\n", feed.Channel.Title)
 	for _, post := range feed.Channel.Item {
-		fmt.Printf("'%s'\n", post.Title)
+		postRow, err := storePost(s, post, feedRow.ID)
+		if err != nil {
+			return err
+		} else if postRow != nil {
+			newPosts++
+			fmt.Printf("Post '%s' created!\n", postRow.Title)
+		}
 	}
-	fmt.Println()
+	fmt.Printf("%d new posts stored\n\n", newPosts)
 	return nil
+}
+
+func storePost(s *state, post RSSItem, feedId uuid.UUID) (*database.Post, error) {
+
+	publishedAt := sql.NullTime{}
+	if t, err := time.Parse(time.RFC1123Z, post.PubDate); err == nil {
+		publishedAt = sql.NullTime{
+			Time:  t,
+			Valid: true,
+		}
+	}
+	postParams := database.CreatePostParams{
+		ID:    uuid.New(),
+		Title: post.Title,
+		Url:   post.Link,
+		Description: sql.NullString{
+			String: post.Description,
+			Valid:  post.Description != "",
+		},
+		PublishedAt: publishedAt,
+		FeedID:      feedId,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+	}
+
+	postRow, err := s.db.CreatePost(context.Background(), postParams)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("couldn't create post: %w", err)
+	}
+
+	return &postRow, nil
 }

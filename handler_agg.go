@@ -18,7 +18,10 @@ func handlerAgg(s *state, cmd command) error {
 	defer ticker.Stop()
 
 	for ; ; <-ticker.C {
-		scrapeFeed(s)
+		err := scrapeFeed(s)
+		if err != nil {
+			fmt.Printf("couldn't scrape feed: %s", err)
+		}
 	}
 
 	return nil
